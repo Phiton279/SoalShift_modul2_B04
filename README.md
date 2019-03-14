@@ -102,7 +102,6 @@ Padah soal ini kita diminta untuk membuat sebuah daemon yang bekerja untuk membu
 file makan sehat dibuat ketika seseorang telah melakukan akses terhadap file makan_enak.txt.file itu akan terbuat setrusnya setiap 5 detik
 selama tigapuluh detik kedepan. sehingga ketika dia dibuka dan tidak diakses selama 30 detik kedepan maka akan terbentuk 6 item.
 
-#### Jawaban
 
 ```
 #include <sys/types.h>
@@ -171,7 +170,7 @@ int main() {
     hour = now_tm->tm_hour;
 
     stat("makan_enak.txt",&filestat);
-    /* newline included in ctime() output */
+
     printf(" File access time %s",
             ctime(&filestat.st_atim.tv_sec)
           );
@@ -224,11 +223,114 @@ if ((chdir("/home/phiton2/Documents/")) < 0) {
   }
 
 ```
-sebagai directory yang lengkap dan menambahkan include time.h agar dapat mengakses time() , localtime() 
+sebagai directory yang lengkap dan menambahkan include time.h agar dapat mengakses time() , localtime() kemudian deklarasi int angka
 yang dibutuhkan oleh program.
 
-kemudian yang akan dijelaskan adalah fungsi timelapse dan program yang berada dalam loop while.
+kemudian yang akan dijelaskan adalah fungsi makefile dan program yang berada dalam loop while.
 
+```
+void makefile(int angka){
+
+    char filename[sizeof "makan_sehat10000.txt"];
+    sprintf(filename, "makan_sehat%d.txt", angka);
+    FILE* file_ptr = fopen(filename, "w");
+    fclose(file_ptr);
+
+}
+
+```
+
+Dalam fungsi makefile merupakan fungsi yang akan membuat file makan_sehat
+
+```
+char filename[sizeof "makan_sehat10000.txt"]; 
+
+```
+agar dapat membuat file yang increament maka membuat sebuah array char yang dihitung dahulu size nya untuk nantinya dilakukan sprintf
+
+```
+sprintf(filename, "makan_sehat%d.txt", angka);
+
+```
+
+dalam sprint f kita menggabungkan string makan sehat dan increament angka. sehingga nantinya string filename bisa melakukan increament
+
+```
+FILE* file_ptr = fopen(filename, "w");
+fclose(file_ptr);
+
+```
+Kemudian file diciptakan dengan File dan fopen serta tambahan w untuk writetable , string yang dipakai adalah filename dan kemduian diclose.
+
+Pada bagian while pertama-tama dilakukan deklarasi terlebih dahulu
+
+```
+struct stat filestat;
+time_t now;
+struct tm *now_tm;
+struct tm *now_tm2;
+int hour,seconds,minutes,seconds1,minutes1,hour1;
+
+```
+pertama tama membuat sebuah struct stat yang bernama file stat , nantinya struct ini akan berisi data tentang akses file makan enak.
+kemudian membuat now , sebagai deklrasi waktu yang akan dimasukan nilai time nantinya. kemudian membuat struct tm , tm_1 tm2 untuk mengisi waktu.
+struct tm dalam c telah terprogram berisi nilai waktu2 yang bisa dipanggil.
+
+```
+stat("makan_enak.txt",&filestat);
+    printf(" File access time %s",
+            ctime(&filestat.st_atim.tv_sec)
+          );
+    printf(" File modify time %s",
+            ctime(&filestat.st_mtime)
+          );
+    printf("File changed time %s",
+            ctime(&filestat.st_ctime)
+          );
+
+```
+pada bagian ini adalah debuging untuk menampilkan file acces time yang berguna menjadi penanda terbukanya file.
+
+```
+/*untuk jam saat ini*/
+now = time(NULL);
+now_tm = localtime(&now);
+seconds = now_tm->tm_sec;
+minutes = now_tm->tm_min;
+hour = now_tm->tm_hour;
+
+/*untuk jam file diakses*/
+now_tm2 = localtime(&filestat.st_atim.tv_sec);
+seconds1 = now_tm2->tm_sec;
+minutes1 = now_tm2->tm_min;
+hour1    = now_tm2->tm_hour;
+
+```
+Pada bagian ini kita akan akan memasukan nilai waktu ketika daemon sedang berjalan dalam while,sehingga akan terupdate terus nilai waktunya.
+now_tm = localtime(&now) untuk memasukan waktu saat ini. kemudian dilakukan extract jam,menit,second kedalam sebuah variable nantinya dibandingkan
+dengan waktu file diakses.
+
+```
+if(hour1==hour){
+    if(minutes==minutes1){
+        if((seconds-seconds1)<=30){
+                
+            makefile(angka);
+            angka++;
+            printf("make");
+        };
+    }
+    else if((((minutes-minutes1)*60)-seconds1)<=30 && (((minutes-minutes1)*60)-seconds1)>=0 ){
+        makefile(angka);
+        angka++;
+        printf("make");
+    }
+}
+
+```
+pada bagian ini adalah penjelasan fungsi tentang cek waktu apakah file sudah dibuka 30 detik , apabila 
+beda waktu file dibuka dan waktu sekarang kurang dari 30 detik  dengan menit sama dan jamnya juga maka akan dijalankan fungsi makefile.
+apabila menitnya tidak sama makan perbedaan menit dikali 60 dan dicek apakah kurang dari 30 detik maka akan dilakukan pembuatan file juga
 
 
 ### **Nomor 5**

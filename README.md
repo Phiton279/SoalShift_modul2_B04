@@ -98,13 +98,138 @@ Contoh nama file : makan_sehat1.txt, makan_sehat2.txt, dst
 ```
 ### Pemahaman Soal 4
 
+Padah soal ini kita diminta untuk membuat sebuah daemon yang bekerja untuk membuat file makan_sehat#.txt , # adalah angka ,
+file makan sehat dibuat ketika seseorang telah melakukan akses terhadap file makan_enak.txt.file itu akan terbuat setrusnya setiap 5 detik
+selama tigapuluh detik kedepan. sehingga ketika dia dibuka dan tidak diakses selama 30 detik kedepan maka akan terbentuk 6 item.
+
 #### Jawaban
 
 ```
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <string.h>
+#include <time.h>
+
+
+void makefile(int angka){
+
+    char filename[sizeof "makan_sehat10000.txt"];
+    sprintf(filename, "makan_sehat%d.txt", angka);
+    FILE* file_ptr = fopen(filename, "w");
+    fclose(file_ptr);
+
+}
+
+int main() {
+  pid_t pid, sid;
+  int angka=1;
+
+  pid = fork();
+
+  if (pid < 0) {
+    exit(EXIT_FAILURE);
+  }
+
+  if (pid > 0) {
+    exit(EXIT_SUCCESS);
+  }
+
+  umask(0);
+
+  sid = setsid();
+
+  if (sid < 0) {
+    exit(EXIT_FAILURE);
+  }
+
+  if ((chdir("/home/phiton2/Documents/")) < 0) {
+    exit(EXIT_FAILURE);
+  }
+
+  close(STDIN_FILENO);
+  close(STDOUT_FILENO);
+  close(STDERR_FILENO);
+
+  while(1) {
+    
+    struct stat filestat;
+    time_t now;
+    struct tm *now_tm;
+    struct tm *now_tm2;
+    int hour,seconds,minutes,seconds1,minutes1,hour1;
+
+    now = time(NULL);
+    now_tm = localtime(&now);
+    seconds = now_tm->tm_sec;
+    minutes = now_tm->tm_min;
+    hour = now_tm->tm_hour;
+
+    stat("makan_enak.txt",&filestat);
+    /* newline included in ctime() output */
+    printf(" File access time %s",
+            ctime(&filestat.st_atim.tv_sec)
+          );
+    printf(" File modify time %s",
+            ctime(&filestat.st_mtime)
+          );
+    printf("File changed time %s",
+            ctime(&filestat.st_ctime)
+          );
+    
+    now_tm2 = localtime(&filestat.st_atim.tv_sec);
+    seconds1 = now_tm2->tm_sec;
+    minutes1 = now_tm2->tm_min;
+    hour1    = now_tm2->tm_hour;
+
+    if(hour1==hour){
+        if(minutes==minutes1){
+            if((seconds-seconds1)<=30){
+                
+                makefile(angka);
+                angka++;
+                printf("make");
+            };
+        }
+        else if((((minutes-minutes1)*60)-seconds1)<=30 && (((minutes-minutes1)*60)-seconds1)>=0 ){
+                makefile(angka);
+                angka++;
+                printf("make");
+            }
+    }
+
+
+    printf("jangka waktu sec %d\n",((minutes-minutes1)*60)-seconds1);
+    printf("jangka waktu min %d\n",minutes-minutes1);
+
+    sleep(5);
+  }
+  
+  exit(EXIT_SUCCESS);
+}
 
 ```
 
 ### Penjelasan
+
+Soal ini memakai template daemon, yang diberi tambahan adalah 
+```
+if ((chdir("/home/phiton2/Documents/")) < 0) {
+    exit(EXIT_FAILURE);
+  }
+
+```
+sebagai directory yang lengkap dan menambahkan include time.h agar dapat mengakses time() , localtime() 
+yang dibutuhkan oleh program.
+
+kemudian yang akan dijelaskan adalah fungsi timelapse dan program yang berada dalam loop while.
+
+
 
 ### **Nomor 5**
 

@@ -103,7 +103,7 @@ file makan sehat dibuat ketika seseorang telah melakukan akses terhadap file mak
 selama tigapuluh detik kedepan. sehingga ketika dia dibuka dan tidak diakses selama 30 detik kedepan maka akan terbentuk 6 item.
 
 
-```
+```C
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -217,7 +217,7 @@ int main() {
 ### Penjelasan
 
 Soal ini memakai template daemon, yang diberi tambahan adalah 
-```
+```C
 if ((chdir("/home/phiton2/Documents/")) < 0) {
     exit(EXIT_FAILURE);
   }
@@ -228,7 +228,7 @@ yang dibutuhkan oleh program.
 
 kemudian yang akan dijelaskan adalah fungsi makefile dan program yang berada dalam loop while.
 
-```
+```C
 void makefile(int angka){
 
     char filename[sizeof "makan_sehat10000.txt"];
@@ -242,20 +242,20 @@ void makefile(int angka){
 
 Dalam fungsi makefile merupakan fungsi yang akan membuat file makan_sehat
 
-```
+```C
 char filename[sizeof "makan_sehat10000.txt"]; 
 
 ```
 agar dapat membuat file yang increament maka membuat sebuah array char yang dihitung dahulu size nya untuk nantinya dilakukan sprintf
 
-```
+```C
 sprintf(filename, "makan_sehat%d.txt", angka);
 
 ```
 
 dalam sprint f kita menggabungkan string makan sehat dan increament angka. sehingga nantinya string filename bisa melakukan increament
 
-```
+```C
 FILE* file_ptr = fopen(filename, "w");
 fclose(file_ptr);
 
@@ -264,7 +264,7 @@ Kemudian file diciptakan dengan File dan fopen serta tambahan w untuk writetable
 
 Pada bagian while pertama-tama dilakukan deklarasi terlebih dahulu
 
-```
+```C
 struct stat filestat;
 time_t now;
 struct tm *now_tm;
@@ -276,7 +276,7 @@ pertama tama membuat sebuah struct stat yang bernama file stat , nantinya struct
 kemudian membuat now , sebagai deklrasi waktu yang akan dimasukan nilai time nantinya. kemudian membuat struct tm , tm_1 tm2 untuk mengisi waktu.
 struct tm dalam c telah terprogram berisi nilai waktu2 yang bisa dipanggil.
 
-```
+```C
 stat("makan_enak.txt",&filestat);
     printf(" File access time %s",
             ctime(&filestat.st_atim.tv_sec)
@@ -291,7 +291,7 @@ stat("makan_enak.txt",&filestat);
 ```
 pada bagian ini adalah debuging untuk menampilkan file acces time yang berguna menjadi penanda terbukanya file.
 
-```
+```C
 /*untuk jam saat ini*/
 now = time(NULL);
 now_tm = localtime(&now);
@@ -310,7 +310,7 @@ Pada bagian ini kita akan akan memasukan nilai waktu ketika daemon sedang berjal
 now_tm = localtime(&now) untuk memasukan waktu saat ini. kemudian dilakukan extract jam,menit,second kedalam sebuah variable nantinya dibandingkan
 dengan waktu file diakses.
 
-```
+```C
 if(hour1==hour){
     if(minutes==minutes1){
         if((seconds-seconds1)<=30){

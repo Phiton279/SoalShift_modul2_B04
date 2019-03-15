@@ -767,8 +767,121 @@ kemudian ada rentang waktu untuk menjadi nilai # pada file log.
 Setelah itu kita akan membuat sebuah directory sehinggaa kita memerlukan penamaan ,awalnya kita membuat char file name untuk tempat folder kemudian kita memberikan size seuai dengan format yang diminta kemudian , kita mengisi filename dengan format waktu.disini kita menggunakan %02d sebagai integer dan 2 digit. sehingga ketika 1 menjadi 01. kemudian
 lanjut kefungsi make directory
 
+``` C
+    char location[]="/home/phiton2/log/";
+    char dirname[sizeof "mkdir /home/phiton2/log/dd:mm:yyyy-hh:mm"];
+    char filesname[sizeof "/home/phiton2/log/dd:mm:yyyy-hh:mm"];
+    sprintf(dirname, "mkdir %s%s/", location,name);
+    sprintf(filesname, "%s%s/", location,name);
+    system(dirname);
+```
 
+Didalam fungsi makedirectoyr kita membuat sebuah array of char yang berisi location untuk file log , kemudian dir name untuk
+membuat directory dengan ketentuan yang sudah ada dan menambhkan mkdir didepan agar nantinya bsa melakukan pembuatan dirctory dengan pemanggilan fungsi system. kemudain membuat files name sama dengan dirname namun tanpa mkdir. kemudian melakukan
+sprintf dirname untuk mengisi dirname dengan location ditambah name dan sprintf fielsname untuk penggabungan location dan name tanpa mkdir.
+kemudian jalankan system (dirname) untuk membuat directory
 
+```C
+ while(angka<=30){
 
+    FILE *fptr1, *fptr2; 
+    
+    char source[] = "/var/log/syslog";
+    char c; 
+```
 
+Bagian ini while dibuat batasanya 30 adalah while akan berjalan dalam 30 menit dikarenakan sleep akan dibuat setiap 60 detik.
+sehingga setiap 30 menit akan keluar fungsi directory dan membuat directory yang baru.
+Kemudian dilakukan deklrasai FILE untuk nantinya ktia bsa melakukan copy syslog ke file log baru.
+kemudain mengsisi array of char source untuk source dari syslog dan char c untuk membantu proses copy.
 
+```C
+    fptr1 = fopen(source, "r"); 
+    if (fptr1 == NULL) 
+    { 
+        printf("Cannot open file --%s \n",source); 
+        exit(0); 
+    } 
+    printf("%s\n",source);
+```
+
+Pada bagian ini kita mencoba membuka file source yakni syslog , bila tidak ada maka program akan keuar.disini keguananya untuk debuging. 
+
+```C
+    char filename[sizeof "log10000.log"];
+    sprintf(filename, "%slog%d.log",filesname,angka);
+    FILE* file_ptr = fopen(filename, "w");
+    fclose(file_ptr);
+```
+Didalam bagian ini kta melakukan pembuatan file log.log dengan memberikan penamaan dan mlakukan pembukaan file.
+fopen menggunakan w agar bsa diwrite dan kemudian diclose.
+
+```
+    fptr2 = fopen(filename, "w"); 
+    if (fptr2 == NULL) 
+    { 
+        printf("Cannot open file xx%s \n",filename); 
+        exit(0); 
+    } 
+```
+
+Pada bagian ini kita mencoba membuka file log , bila tidak ada maka program akan keuar.disini keguananya untuk debuging. 
+```C
+ c = fgetc(fptr1); 
+    while (c != EOF) 
+    { 
+        fputc(c, fptr2); 
+        c = fgetc(fptr1); 
+    } 
+```
+Didalam ini kita kita akan melakuakn penulisan dari file source ke file log. kita menggunakan fgetc unutk menggambil line tiap line  dri fptr1 atau syslog kemudian , kita membuat while dengan batasan ketika c yakni baris dalam syslog tidak end of file
+makan akan dilakukan pengcopyan line dengan fputc ke file log#.log yang dibuat permenit. kemudian melakukan pembacaan kembali dengan fgetc.
+
+```C
+    fclose(fptr1); 
+    fclose(fptr2);
+    
+    angka+=1;
+    sleep(60);
+```
+sesudah itu kita melakuakn close pada setiap file kemudian meambahkanvariable angka dan melakukan sleep selama 60 detik yakni satu menit unutk pembuatan file log selanjutnya.
+
+#### Jawaban 5b
+```C
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <string.h>
+
+int main (){
+    char pid[500];
+    FILE *process;
+    process = popen("pidof Daemon5","r");
+    fgets(pid,500,process);
+    
+    kill(atoi(pid), SIGKILL);
+
+    return 0;
+
+}
+
+```
+#### Penjealasan 5b
+Disini kita menggunakan include signal untuk melakukan kill dan pidof untuk mengambil pid filee.
+
+```C
+    char pid[500];
+    FILE *process;
+```
+pertama tama kita mebuat array of char pid dan File procces untuk melakuka popen pada file yang ingin dicek pid nya yakni Daemon5
+
+```C
+    process = popen("pidof Daemon5","r");
+    fgets(pid,500,process);
+```
+kemudian melakukan pengambilan pid dengan pidof dan mlakikan fgets.
+
+```C
+    kill(atoi(pid), SIGKILL);
+```
+terakhir kita melakukan kill pid dengan file yang berhubungan.

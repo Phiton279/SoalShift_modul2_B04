@@ -339,22 +339,170 @@ apabila menitnya tidak sama makan perbedaan menit dikali 60 dan dicek apakah kur
 
 ```
 Kerjakan poin a dan b di bawah:
-Buatlah program c untuk mencatat log setiap menit dari file log pada syslog ke /home/[user]/log/[dd:MM:yyyy-hh:mm]/log#.log
+a.Buatlah program c untuk mencatat log setiap menit dari file log pada syslog ke /home/[user]/log/[dd:MM:yyyy-hh:mm]/log#.log
 Ket:
 Per 30 menit membuat folder /[dd:MM:yyyy-hh:mm]
 Per menit memasukkan log#.log ke dalam folder tersebut
 ‘#’ : increment per menit. Mulai dari 1
-Buatlah program c untuk menghentikan program di atas.
+b.Buatlah program c untuk menghentikan program di atas.
 NB: Dilarang menggunakan crontab dan tidak memakai argumen ketika menjalankan program.
 ```
 
 ### Pemahaman Soal 5
 
-#### Jawaban
+Didalam Soal ini kita diminta untuk membuat sebuag folder setiap 30 menit yang bernama date saat ini , dengan bentuk
+dd:MM:yyyy-hh:mm,kemudian setioa 1 menit dibuat file log#.log dimana # adalah increament integer mulai dari 1.isi file log adalah isi dari file syslog.
+kemudian b membuat program untuk menghentikan process tersebut.
+
+#### Jawaban 5a
+
 ```
-code
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <string.h>
+#include <time.h>
+#include <syslog.h>
+
+
+void make_directory(const char* name,int angka) 
+{   char location[]="/home/phiton2/log/";
+    char dirname[sizeof "mkdir /home/phiton2/log/dd:mm:yyyy-hh:mm"];
+    char filesname[sizeof "/home/phiton2/log/dd:mm:yyyy-hh:mm"];
+    sprintf(dirname, "mkdir %s%s/", location,name);
+    sprintf(filesname, "%s%s/", location,name);
+    printf("%s\n",dirname);
+    printf("%s\n",filesname);
+
+    system(dirname);
+
+  while(angka<=30){
+
+    FILE *fptr1, *fptr2; 
+    
+    char source[] = "/var/log/syslog";
+    char c; 
+
+  
+    fptr1 = fopen(source, "r"); 
+    if (fptr1 == NULL) 
+    { 
+        printf("Cannot open file --%s \n",source); 
+        exit(0); 
+    } 
+    printf("%s\n",source);
+    
+    char filename[sizeof "log10000.log"];
+    sprintf(filename, "%slog%d.log",filesname,angka);
+    FILE* file_ptr = fopen(filename, "w");
+    fclose(file_ptr);
+
+    fptr2 = fopen(filename, "w"); 
+    if (fptr2 == NULL) 
+    { 
+        printf("Cannot open file xx%s \n",filename); 
+        exit(0); 
+    } 
+  
+
+    c = fgetc(fptr1); 
+    while (c != EOF) 
+    { 
+        fputc(c, fptr2); 
+        c = fgetc(fptr1); 
+    } 
+  
+  
+    fclose(fptr1); 
+    fclose(fptr2);
+    
+    angka+=1;
+    sleep(60);
+  }
+} 
+
+
+
+void makefolder(int hour,int minutes,int day,int month,int years,int angka){
+
+    char filename[sizeof "dd:MM:yyyy-hh:mm"];
+    sprintf(filename, "%02d:%02d:20%02d-%02d:%02d", day,month,years,hour,minutes);
+    make_directory(filename,angka);
+
+}
+
+
+int main() {
+  pid_t pid, sid;
+  int renwaktu=0;
+
+  pid = fork();
+
+  if (pid < 0) {
+    exit(EXIT_FAILURE);
+  }
+
+  if (pid > 0) {
+    exit(EXIT_SUCCESS);
+  }
+
+  umask(0);
+
+  sid = setsid();
+
+  if (sid < 0) {
+    exit(EXIT_FAILURE);
+  }
+
+  if ((chdir("/")) < 0) {
+    exit(EXIT_FAILURE);
+  }
+
+  close(STDIN_FILENO);
+  close(STDOUT_FILENO);
+  close(STDERR_FILENO);
+
+  while(1) {
+    time_t now;
+    struct tm *now_tm;
+    int hour,seconds,minutes,day,month,years;
+
+
+    now = time(NULL);
+    now_tm = localtime(&now);
+    seconds = now_tm->tm_sec;
+    minutes = now_tm->tm_min;
+    hour = now_tm->tm_hour;
+    day = now_tm->tm_mday;
+    month = now_tm->tm_mon;
+    years = now_tm->tm_year;
+
+    makefolder(hour,minutes,day,month+1,years-100,renwaktu+1);
+    sleep(1);
+  }
+  
+  exit(EXIT_SUCCESS);
+}
 
 ```
 
-#### Penjelasan
+#### Penjelasan 5a
+Didalam program ini kita menggunakan template daemon, Kemudian penjelasan pertama dari while dari int main adalah sebagai berikut
+
+```  
+    time_t now;
+    struct tm *now_tm;
+    int hour,seconds,minutes,day,month,years;
+
+```
+Pertama tama kita melakukan dekrasai variable yang berisi now , now_tm dan variable waktu
+
+
+
+
 

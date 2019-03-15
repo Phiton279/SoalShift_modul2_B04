@@ -4,6 +4,13 @@ Pengerjaan Soal Shift Modul 2 Sisop 2019
 # Soal Shift Modul 2
 
 ## Kelompok B4
+#### ***Ersad Ahmad Ishlahuddin***
+
+#### ***05111740000016***
+
+#### ***Philip Antoni Siahaan***
+
+#### ***05111740000111***
 
 ### **Nomor 1**
 
@@ -16,15 +23,147 @@ Catatan : Tidak boleh menggunakan crontab.
 ```
 
 #### Pemahaman Soal 1
-
+Inti pada soal nomor 1 adalah mengganti nama sekaligus memindah suatu file yang berekstensi .png dari direktori tertentu ke "/home/[user]/modul2/gambar"
 
 #### Jawaban
-```
-code
+#### Source code
+```c
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <sys/dir.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <string.h>
+
+int main() {
+    pid_t pid, sid;
+
+    pid = fork();
+
+    if (pid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid > 0) {
+        exit(EXIT_SUCCESS);
+    }
+
+    umask(0);
+
+    sid = setsid();
+
+    if (sid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    if ((chdir("/")) < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+
+    while(1) {
+        DIR *imdir;
+        struct dirent *imp;
+        imdir = opendir ("/home/aeris/Pictures/");
+        if (imdir != NULL){
+            while ((imp = readdir (imdir)) != NULL){
+                int len = strlen(imp->d_name)-4;
+                char name_d[234];
+                
+                strcpy(name_d, imp->d_name);
+                if(strcmp(name_d+len, ".png") == 0){
+                    char source[234]="/home/aeris/Pictures/";
+                    char destination[234]="/home/aeris/modul2/gambar/";
+                    for(int i = 0; i < 4; i++, len++)
+                    {
+                        name_d[len] = '\0';
+                    }
+                    strcat(name_d, "_grey.png");
+                    strcat(source, imp->d_name);
+                    strcat(destination, name_d);
+                    pid_t child_id;
+                    int status;
+                    
+                    child_id = fork();
+
+                    if (child_id == 0) {
+                        char *argv[4] = {"mv", source, destination, NULL};
+                        execv("/bin/mv", argv);
+                    }
+                    else{
+                        while ((wait(&status)) > 0);
+                    }
+                
+                }
+        
+            }
+        }
+        closedir(imdir);
+        sleep(1);
+    }
+    exit(EXIT_SUCCESS);
+}
 ```
 
 #### Penjelasan
+```c
+DIR *imdir;
+struct dirent *imp;
+imdir = opendir ("/home/aeris/Pictures/");
+```
+Membuka direktori file yang akan diproses
+```c
+if (imdir != NULL){
+while ((imp = readdir (imdir)) != NULL){
+```
+Membaca apakah direktorinya ada, lalu membaca file sampai akhir
+```c
+int len = strlen(imp->d_name)-4;
+char name_d[234];
+strcpy(name_d, imp->d_name);
+```
+Variabel len untuk menyimpan panjang string file yang dibaca tanpa ".png". Kemudian variabel name_d untuk menyimpan nama file yang telah diubah, menggunakan strcpy untuk mendapatkan nama file yang dibaca.
+```c
+if(strcmp(name_d+len, ".png") == 0)
+```
+Membaca apakah ekstensi file yang dibaca adalah .png
+```c
+char source[234]="/home/aeris/Pictures/";
+char destination[234]="/home/aeris/modul2/gambar/";
+```
+Varibel source dan destination untuk menyimpan directory asal dan tujuan file
+```c
+for(int i = 0; i < 4; i++, len++)
+{
+    name_d[len] = '\0';
+}
+```
+Menghapus ".png" pada name_d karena akan diganti dengan _grey.png
+```c
+strcat(name_d, "_grey.png");
+strcat(source, imp->d_name);
+strcat(destination, name_d);
+```
+Menambahkan _grey.png pada variabel name_d
+Menambahkan nama-nama file yang akan dipindah
+```c
+char *argv[4] = {"mv", source, destination, NULL};
+execv("/bin/mv", argv);
+```
+Menggunakan perintah mv untuk memindah file dari source ke destination
+Lalu melakukan execv
+
+
 
 ### **Nomor 2**
 
@@ -36,15 +175,104 @@ Catatan: Tidak boleh menggunakan crontab
 
 ```
 #### Pemahaman Soal 2
+Inti pada soal nomor 2 adalah mengubah permission dan menghapus file, namun dengan owner dan groupnya adalah www-data.
 
 #### Jawaban 2
-```
-code
+#### Source Code
+```c
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <sys/dir.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <string.h>
+#include <pwd.h>
+#include <grp.h>
+
+int main() {
+    pid_t pid, sid;
+
+    pid = fork();
+
+    if (pid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid > 0) {
+        exit(EXIT_SUCCESS);
+    }
+
+    umask(0);
+
+    sid = setsid();
+
+    if (sid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    if ((chdir("/home/aeris/modul2/nomor2/hatiku/")) < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+    while(1) {
+        char elennn[] = "elen.ku";
+        struct stat avail;
+        
+        if(!stat(elennn, &avail)) 
+        {
+            struct passwd *sandi = getpwuid(avail.st_uid);
+            struct group *grup = getgrgid(avail.st_gid);
+
+            if(strcmp(sandi->pw_name, "www-data") == 0 && strcmp(grup->gr_name, "www-data") == 0)
+            {
+                chmod (elennn, 0777);
+                remove(elennn);
+            }
+        }    
+        sleep(3);
+    }
+    exit(EXIT_SUCCESS);
+}
 
 ```
 
 #### Penjelasan
-
+```c
+if ((chdir("/home/aeris/modul2/nomor2/hatiku/")) < 0) {
+```
+Mengubah direktori kerja
+```c
+char elennn[] = "elen.ku";
+struct stat avail;
+```
+Deklarasi file yang akan diproses.
+```c
+if(!stat(elennn, &avail)) {
+Mengecek status file
+```
+```c
+struct passwd *sandi = getpwuid(avail.st_uid);
+struct group *grup = getgrgid(avail.st_gid);
+```
+Menyimpan user dan group dari file
+```c
+if(strcmp(sandi->pw_name, "www-data") == 0 && strcmp(grup->gr_name, "www-data") == 0)
+```
+Membandingkan jika user dan groupnya adalah "www-data"
+```c
+chmod (elennn, 0777);
+remove(elennn);
+```
+Mengubah permission dan Menghapus file
 
 ### **Nomor 3**
 

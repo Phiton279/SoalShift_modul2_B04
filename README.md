@@ -584,7 +584,7 @@ kemudian b membuat program untuk menghentikan process tersebut.
 
 #### Jawaban 5a
 
-```
+```C
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -722,13 +722,51 @@ int main() {
 #### Penjelasan 5a
 Didalam program ini kita menggunakan template daemon, Kemudian penjelasan pertama dari while dari int main adalah sebagai berikut
 
-```  
+```C  
     time_t now;
     struct tm *now_tm;
     int hour,seconds,minutes,day,month,years;
 
 ```
-Pertama tama kita melakukan dekrasai variable yang berisi now , now_tm dan variable waktu
+Pertama tama kita melakukan dekrasai variable yang berisi now , now_tm dan variable waktu untuk mengisi jam,second,menit dll.
+
+```C
+now = time(NULL);
+now_tm = localtime(&now);
+
+```
+Didalam ini kita melakukan pengambilan local time machine kita yang sekarang dan memasukanya kedalam struct tm ,sebagai informasi
+struct tm memiloki banyak variable sepert tm_mon untuk mengambil bulan sehingga mudah untuk mengaksesnya
+
+```C
+    seconds = now_tm->tm_sec;
+    minutes = now_tm->tm_min;
+    hour = now_tm->tm_hour;
+    day = now_tm->tm_mday;
+    month = now_tm->tm_mon;
+    years = now_tm->tm_year;
+
+```
+Dibagian ini kita melakukan pengambilan semua variable yang dibutuhkan untuk membuat nama folder. kemudian mengisikannya kedalam variable
+
+``` C
+makefolder(hour,minutes,day,month+1,years-100,renwaktu+1);
+
+```
+setelah itu kita melakukan pemanggilan fungsi makefolder ,kita memasukan parameter yang diperlukan dan ada penambahan yakni 
+month ditambah satu agar sesuai dengan bulan sekarang , years dikurang sertaus agar dapat menampilakan 19 bila tahun 019 , 
+kemudian ada rentang waktu untuk menjadi nilai # pada file log.
+
+
+```C
+    char filename[sizeof "dd:MM:yyyy-hh:mm"];
+    sprintf(filename, "%02d:%02d:20%02d-%02d:%02d", day,month,years,hour,minutes);
+    make_directory(filename,angka);
+
+```
+Setelah itu kita akan membuat sebuah directory sehinggaa kita memerlukan penamaan ,awalnya kita membuat char file name untuk tempat folder kemudian kita memberikan size seuai dengan format yang diminta kemudian , kita mengisi filename dengan format waktu.disini kita menggunakan %02d sebagai integer dan 2 digit. sehingga ketika 1 menjadi 01. kemudian
+lanjut kefungsi make directory
+
 
 
 

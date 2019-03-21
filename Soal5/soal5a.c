@@ -16,7 +16,7 @@ void make_directory(const char* name,int angka)
     char dirname[sizeof "mkdir /home/phiton2/log/dd:mm:yyyy-hh:mm"];
     char filesname[sizeof "/home/phiton2/log/dd:mm:yyyy-hh:mm"];
     
-    mkdir(filesname, 0700)
+    mkdir(filesname, 0700);
     sprintf(filesname, "%s%s/", location,name);
     printf("%s\n",dirname);
     printf("%s\n",filesname);

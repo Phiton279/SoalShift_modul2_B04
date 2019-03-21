@@ -602,12 +602,11 @@ void make_directory(const char* name,int angka)
 {   char location[]="/home/phiton2/log/";
     char dirname[sizeof "mkdir /home/phiton2/log/dd:mm:yyyy-hh:mm"];
     char filesname[sizeof "/home/phiton2/log/dd:mm:yyyy-hh:mm"];
-    sprintf(dirname, "mkdir %s%s/", location,name);
     sprintf(filesname, "%s%s/", location,name);
+    mkdir(filesname, 0700);
     printf("%s\n",dirname);
     printf("%s\n",filesname);
 
-    system(dirname);
 
   while(angka<=30){
 
@@ -771,15 +770,14 @@ lanjut kefungsi make directory
     char location[]="/home/phiton2/log/";
     char dirname[sizeof "mkdir /home/phiton2/log/dd:mm:yyyy-hh:mm"];
     char filesname[sizeof "/home/phiton2/log/dd:mm:yyyy-hh:mm"];
-    sprintf(dirname, "mkdir %s%s/", location,name);
     sprintf(filesname, "%s%s/", location,name);
-    system(dirname);
+    mkdir(filesname,0700)
 ```
 
 Didalam fungsi makedirectoyr kita membuat sebuah array of char yang berisi location untuk file log , kemudian dir name untuk
 membuat directory dengan ketentuan yang sudah ada dan menambhkan mkdir didepan agar nantinya bsa melakukan pembuatan dirctory dengan pemanggilan fungsi system. kemudain membuat files name sama dengan dirname namun tanpa mkdir. kemudian melakukan
 sprintf dirname untuk mengisi dirname dengan location ditambah name dan sprintf fielsname untuk penggabungan location dan name tanpa mkdir.
-kemudian jalankan system (dirname) untuk membuat directory
+kemudian jalankan mkdir(filesname,0700) untuk membuat directory
 
 ```C
  while(angka<=30){

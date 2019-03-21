@@ -15,12 +15,13 @@ void make_directory(const char* name,int angka)
 {   char location[]="/home/phiton2/log/";
     char dirname[sizeof "mkdir /home/phiton2/log/dd:mm:yyyy-hh:mm"];
     char filesname[sizeof "/home/phiton2/log/dd:mm:yyyy-hh:mm"];
-    sprintf(dirname, "mkdir %s%s/", location,name);
+    
+    mkdir(filesname, 0700)
     sprintf(filesname, "%s%s/", location,name);
     printf("%s\n",dirname);
     printf("%s\n",filesname);
 
-    system(dirname);
+ 
 
   while(angka<=30){
 

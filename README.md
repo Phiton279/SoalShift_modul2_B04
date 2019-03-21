@@ -771,7 +771,7 @@ lanjut kefungsi make directory
     char dirname[sizeof "mkdir /home/phiton2/log/dd:mm:yyyy-hh:mm"];
     char filesname[sizeof "/home/phiton2/log/dd:mm:yyyy-hh:mm"];
     sprintf(filesname, "%s%s/", location,name);
-    mkdir(filesname,0700)
+    mkdir(filesname,0700);
 ```
 
 Didalam fungsi makedirectoyr kita membuat sebuah array of char yang berisi location untuk file log , kemudian dir name untuk

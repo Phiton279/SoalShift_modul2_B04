@@ -17,9 +17,10 @@ Pengerjaan Soal Shift Modul 2 Sisop 2019
 #### Soal
 
 ```
-Elen mempunyai pekerjaan pada studio sebagai fotografer. Suatu hari ada seorang klien yang bernama Kusuma yang meminta untuk mengubah nama file yang memiliki ekstensi .png menjadi “[namafile]_grey.png”. Karena jumlah file yang diberikan Kusuma tidak manusiawi, maka Elen meminta bantuan kalian untuk membuat suatu program C yang dapat mengubah nama secara otomatis dan diletakkan pada direktori /home/[user]/modul2/gambar.
+Elen mempunyai pekerjaan pada studio sebagai fotografer.  
+Suatu hari ada seorang klien yang bernama Kusuma yang meminta untuk mengubah nama file yang memiliki ekstensi .png menjadi “[namafile]_grey.png”.  
+Karena jumlah file yang diberikan Kusuma tidak manusiawi, maka Elen meminta bantuan kalian untuk membuat suatu program C yang dapat mengubah nama secara otomatis dan diletakkan pada direktori /home/[user]/modul2/gambar.  
 Catatan : Tidak boleh menggunakan crontab.
-
 ```
 
 #### Pemahaman Soal 1
@@ -170,7 +171,13 @@ Lalu melakukan execv
 #### Soal 2
 
 ```
-Pada suatu hari Kusuma dicampakkan oleh Elen karena Elen dimenangkan oleh orang lain. Semua kenangan tentang Elen berada pada file bernama “elen.ku” pada direktori “hatiku”. Karena sedih berkepanjangan, tugas kalian sebagai teman Kusuma adalah membantunya untuk menghapus semua kenangan tentang Elen dengan membuat program C yang bisa mendeteksi owner dan group dan menghapus file “elen.ku” setiap 3 detik dengan syarat ketika owner dan grupnya menjadi “www-data”. Ternyata kamu memiliki kendala karena permission pada file “elen.ku”. Jadi, ubahlah permissionnya menjadi 777. Setelah kenangan tentang Elen terhapus, maka Kusuma bisa move on.
+Pada suatu hari Kusuma dicampakkan oleh Elen karena Elen dimenangkan oleh orang lain.  
+Semua kenangan tentang Elen berada pada file bernama “elen.ku” pada direktori “hatiku”.  
+Karena sedih berkepanjangan, tugas kalian sebagai teman Kusuma adalah membantunya untuk menghapus semua kenangan tentang Elen  
+dengan membuat program C yang bisa mendeteksi owner dan group dan menghapus file “elen.ku” setiap 3 detik dengan syarat ketika owner dan grupnya menjadi “www-data”.  
+Ternyata kamu memiliki kendala karena permission pada file “elen.ku”.  
+Jadi, ubahlah permissionnya menjadi 777.  
+Setelah kenangan tentang Elen terhapus, maka Kusuma bisa move on.  
 Catatan: Tidak boleh menggunakan crontab
 
 ```
@@ -292,20 +299,116 @@ Catatan:
 ### Pemahaman Soal 3
 
 ```
-
-
+Inti dari soal nomor 3 adalah mengekstrak suatu file, lalu mengambil daftar file yang berekstensi .txt. 
+Kemudian memasukkannya kedalam file tertentu. Dengan beberapa syarat pengerjaan.
 ```
 
-### Jawaban
+#### Jawaban 3
+#### Source Code
 
-```
-code
+```c
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <sys/dir.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <string.h>
+
+int main(){
+    int status, pipa[2];
+    pid_t child1, child2, child3;
+    pipe(pipa);
+
+    child1 = fork();
+    if(child1 == 0){
+        execlp("unzip", "unzip", "campur2.zip", NULL);
+    }else{
+        while((wait(&status))>0);
+        child2 = fork();
+        if(child2 == 0){
+            execlp("touch", "touch", "daftar.txt", NULL);
+        }else {
+            while((wait(&status))>0);
+            child3 = fork();
+            if(child3 == 0){
+                close(pipa[0]);
+                dup2(pipa[1], 1);
+                close(pipa[1]);
+                execlp("ls", "ls", "campur2", NULL);
+            }else{
+                while((wait(&status))>0);
+                int daFile = open("daftar.txt", O_WRONLY);
+                close(pipa[1]); 
+                dup2(pipa[0], 0);
+                close(pipa[0]);
+                dup2(daFile, 1);
+                close(daFile);
+                execlp("grep", "grep", ".txt$", NULL);
+            }
+        }
+    }
+    return 0;
+}
 
 ```
 
 ### Penjelasan
-
-
+```c
+int status, pipa[2];
+pid_t child1, child2, child3;
+pipe(pipa);
+```
+Memdeklarasikan pipe dan pid_t yang akan digunakan
+```c
+child1 = fork();
+if(child1 == 0){
+    execlp("unzip", "unzip", "campur2.zip", NULL);
+}
+```
+Melakukan fork pada child1. jika Childnya 0 maka exec unzip, untuk mengekstrak file campur.zip.
+```c
+else{
+    while((wait(&status))>0);
+    child2 = fork();
+    if(child2 == 0){
+        execlp("touch", "touch", "daftar.txt", NULL);
+}
+```
+Jika proses di atas selesai, selanjutnya melakukan fork pada child2. jika Childnya 0 maka exec  touch, untuk membuat file daftar.txt.
+```c
+else {
+    while((wait(&status))>0);
+    child3 = fork();
+    if(child3 == 0){
+        close(pipa[0]);
+        dup2(pipa[1], 1);
+        close(pipa[1]);
+        execlp("ls", "ls", "campur2", NULL);
+    }
+}
+```
+Jika proses di atas selesai, selanjutnya melakukan fork pada child3. jika Childnya 0 maka exec ls, untuk mengetahui isi di dalam directory campur2.  
+Namun karena ls akan menampilkan hasilnya pada console, maka output tersebut didup2 ke pipa[1].
+```c
+else{
+    while((wait(&status))>0);
+    int daFile = open("daftar.txt", O_WRONLY);
+    close(pipa[1]); 
+    dup2(pipa[0], 0);
+    close(pipa[0]);
+    dup2(daFile, 1);
+    close(daFile);
+    execlp("grep", "grep", ".txt$", NULL);
+}
+```
+Jika proses di atas selesai, selanjutnya adalah membuka file daftar.txt.  
+Output dari proses grep tersebut didup2 ke daFile.
 ### **Nomor 4**
 
 ### Soal
